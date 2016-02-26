@@ -11,7 +11,7 @@
 #define LOG_PRINT_TS true  // print time stamp in logging
 #define LOG_AUTO_LN  true  // print auto LN (CR) after each call
 
-#define WAVE_GEN_VERSION "0.8.0"
+#define WAVE_GEN_VERSION "0.9.0"
 #define DDS_DEVICE "AD9850"
 
 // LCD keypad ARDUINO pins mapping:
@@ -42,24 +42,24 @@ LiquidCrystal lcd( RS, ENABLE, D4, D5, D6, D7 );
 
 #define pulseHigh(pin) {digitalWrite(pin, HIGH); digitalWrite(pin, LOW); }
 
-#define MIN_FREQUENCY 0.01
-#define MAX_FREQUENCY 20000000.0
-#define DEF_FREQUENCY 1000.0 //default freq
-#define MAX_FREQUENCY_INDEX 8
-#define DEF_FREQUENCY_INDEX 5 //default freq index
+#define MIN_FREQUENCY 1
+#define MAX_FREQUENCY 20000000
+#define DEF_FREQUENCY 1000 //default freq
+#define MAX_FREQUENCY_INDEX 6
+#define DEF_FREQUENCY_INDEX 3 //default freq index
 #define SAVE_TO_M0_INTERVAL 7000 //7 sec after the key was pressed current frequency will be saved to EEPROM
 #define LONG_KEY_PRESS_INTERVAL 1000 //1 sec is considered long keypress
 #define REPEAT_KEY_PRESS_INTERVAL 300 //0,3 sec is considered to start autorepeat
 
 struct MemoryRecord
 {
-  float frequency;
+  uint32_t frequency;
   byte frequency_delta_index;
 };
 
-float frequency = DEF_FREQUENCY; //frequency of VFO
+uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
 byte frequency_delta_index = DEF_FREQUENCY_INDEX;
-const float frequency_delta[] = { 0.01, 0.1, 1, 10, 100, 1000, 10000, 100000, 1000000 };
+const uint32_t frequency_delta[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
 const byte EEPROM_address[] = { 0, 5, 10 };
 bool need_save_to_m0 = false;
 bool state_btn_pressed = false;
@@ -195,7 +195,7 @@ void loop()
             if (frequency_delta_index > MAX_FREQUENCY_INDEX) {
               frequency_delta_index = 0;
             }
-            Log.Info(F("Delta = %l Hz"), long(frequency_delta[frequency_delta_index])); //!!
+            Log.Info(F("Delta = %l Hz"), frequency_delta[frequency_delta_index]);
             LCD_show_frequency_delta(" ");
             need_save_to_m0 = true;
             break;
@@ -231,14 +231,13 @@ void set_frequency()
   // DDS_DEVICE allows an output frequency resolution of 0.0291 Hz with a 125 MHz reference clock applied
   // double freq_tuning_word_d = frequency * 4294967295.0/125000000.0;  // note 125 MHz clock on 9850. You can make 'slight' tuning variations here by adjusting the clock frequency.
   int32_t freq_tuning_word = frequency * 4294967295.0/125000000.0;  // note 125 MHz clock on 9850. You can make 'slight' tuning variations here by adjusting the clock frequency.
-  Log.Info(F("Setting frequency to " DDS_DEVICE ": %l Hz"), long(frequency)); //!!
+  Log.Info(F("Setting frequency to " DDS_DEVICE ": %l Hz"), frequency);
   Log.Debug(F("Tuning word = %l"), freq_tuning_word);
 
   for (int b=0; b<4; b++, freq_tuning_word>>=8) {
     transfer_byte(freq_tuning_word & 0xFF);
   }
   transfer_byte(0x00); // Final control byte, all 0 for 9850 chip
-
   pulseHigh(FQ_UD);  // Done!  Should see output
 }
 
@@ -293,25 +292,25 @@ void init_memory()
 {
   for (byte i=0; i<3; i++) {
     Log.Info(F("Initializing M%d"), i);
-    MemoryRecord m = { -1.0f, 99};
+    MemoryRecord m = { 0, 99};
     EEPROM.get(EEPROM_address[i], m);
-    float f = float(m.frequency);
-    if(isnan(f)) f = 0.0;
-    if(isinf(f)) f = 0.0;
+    uint32_t f = long(m.frequency);
+    if(isnan(f)) f = 0;
+    if(isinf(f)) f = 0;
     byte fdi = byte(m.frequency_delta_index);
     if(isnan(fdi)) fdi = 0;
     if(isinf(fdi)) fdi = 0;
-    Log.Info(F("Stored values: %l Hz, delta = %l Hz"), long(f), long(frequency_delta[fdi])); //!!
+    Log.Info(F("Stored values: %l Hz, delta = %l Hz"), f, frequency_delta[fdi]);
     if((f <= MIN_FREQUENCY) or (f >= MAX_FREQUENCY)){
       m.frequency = DEF_FREQUENCY;
-      Log.Debug(F("Saving new frequency: %l Hz"), long(m.frequency));
+      Log.Debug(F("Saving new frequency: %l Hz"), m.frequency);
     }
     else {
       m.frequency = f;
     }
     if((fdi < 0) or (fdi > MAX_FREQUENCY_INDEX)){
       m.frequency_delta_index = DEF_FREQUENCY_INDEX;
-      Log.Debug(F("Saving new delta: %l Hz"), long(frequency_delta[m.frequency_delta_index]));
+      Log.Debug(F("Saving new delta: %l Hz"), frequency_delta[m.frequency_delta_index]);
     }
     else {
       m.frequency_delta_index = fdi;
@@ -325,9 +324,9 @@ void read_from_memory(byte memory_slot)
 {
   MemoryRecord m;
   EEPROM.get(EEPROM_address[memory_slot], m);
-  frequency = float(m.frequency);
+  frequency = long(m.frequency);
   frequency_delta_index = byte(m.frequency_delta_index);
-  Log.Info(F("Read from EEPROM M%i: %l Hz, delta %l Hz"), memory_slot, long(frequency), long(frequency_delta[m.frequency_delta_index]));
+  Log.Info(F("Read from EEPROM M%i: %l Hz, delta %l Hz"), memory_slot, frequency, frequency_delta[m.frequency_delta_index]);
   lcd.setCursor(14,0);
   lcd.print("M"); lcd.print(memory_slot);
   delay(800);
@@ -342,7 +341,7 @@ void save_to_memory(byte memory_slot)
     frequency_delta_index
   };
   EEPROM.put(EEPROM_address[memory_slot], m);
-  Log.Info(F("Saved to EEPROM M%i: %l Hz, delta %l Hz"), memory_slot, long(frequency), long(frequency_delta[m.frequency_delta_index]));
+  Log.Info(F("Saved to EEPROM M%i: %l Hz, delta %l Hz"), memory_slot, frequency, frequency_delta[m.frequency_delta_index]);
   for (byte i=0; i<3; i++) {
     lcd.setCursor(14,0);
     lcd.print("M"); lcd.print(memory_slot);
