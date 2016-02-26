@@ -1,0 +1,17 @@
+Useful commands:
+#init the project
+platformio init --board=uno -d PRJDIR
+
+# process/build project from the current directory
+ platformio run
+
+# if you don't have enabled auto-uploading, then you can upload firmware manually
+ platformio run --target upload
+
+# to clean cached/compiled files
+ platformio run --target clean
+
+# additional information
+platformio run --help
+
+platformio serialports monitor -b 38400
