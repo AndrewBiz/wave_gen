@@ -71,7 +71,7 @@ unsigned long time_btn_released = 0;
 void setup()
 {
   Log.Init(LOGLEVEL, 38400L, LOG_PRINT_TS, LOG_AUTO_LN);
-  Log.Info(F("Starting DDS "DDS_DEVICE" Wave_Gen, version "WAVE_GEN_VERSION));
+  Log.Info(F("Starting DDS " DDS_DEVICE " Wave_Gen, version " WAVE_GEN_VERSION));
 
   // LCD setup
   lcd.begin(16, 2);
@@ -80,7 +80,7 @@ void setup()
 
   // Initial screen
   LCD_show_line(0, F("AndrewBiz (c)"));
-  LCD_show_line(1, F("Wave_Gen v"WAVE_GEN_VERSION));
+  LCD_show_line(1, F("Wave_Gen v" WAVE_GEN_VERSION));
   delay(1000);
 
   init_memory();
@@ -231,7 +231,7 @@ void set_frequency()
   // DDS_DEVICE allows an output frequency resolution of 0.0291 Hz with a 125 MHz reference clock applied
   // double freq_tuning_word_d = frequency * 4294967295.0/125000000.0;  // note 125 MHz clock on 9850. You can make 'slight' tuning variations here by adjusting the clock frequency.
   int32_t freq_tuning_word = frequency * 4294967295.0/125000000.0;  // note 125 MHz clock on 9850. You can make 'slight' tuning variations here by adjusting the clock frequency.
-  Log.Info(F("Setting frequency to "DDS_DEVICE": %l Hz"), long(frequency)); //!!
+  Log.Info(F("Setting frequency to " DDS_DEVICE ": %l Hz"), long(frequency)); //!!
   Log.Debug(F("Tuning word = %l"), freq_tuning_word);
 
   for (int b=0; b<4; b++, freq_tuning_word>>=8) {
