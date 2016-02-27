@@ -13,15 +13,6 @@
 #define LOG_AUTO_LN  true  // print auto LN (CR) after each call
 #define DDS_DEVICE "AD9850"
 
-// LCD keypad ARDUINO pins mapping:
-#define D4     4 //LCD data
-#define D5     5 //LCD data
-#define D6     6 //LCD data
-#define D7     7 //LCD data
-#define RS     8 //LCD RS
-#define ENABLE 9 //LCD ENABLE
-#define D10   10 // LCD Backlight control
-
 // LCD keypad button pins mapping
 #define btnNONE  0 // originally btnNONE
 #define btnMEMO1 1 // originally btnSELECT
@@ -52,7 +43,6 @@ const uint32_t frequency_delta[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
 extern LiquidCrystal lcd;
 extern uint32_t frequency; //frequency of VFO
 extern byte frequency_delta_index;
-extern bool need_save_to_m0;
 extern bool state_btn_pressed;
 extern bool state_btn_repeat;
 extern byte btn_pressed;
@@ -66,12 +56,11 @@ void frequency_inc();
 void frequency_dec();
 
 // Show frequency
+void LCD_backlight(byte level);
 void LCD_show_frequency();
 void LCD_show_frequency_delta(String prefix);
-// Show info on LCD screen
 void LCD_show_line(byte line_number, String info);
- // read the buttons
-byte read_LCD_buttons();
+byte LCD_read_buttons();
 
 // working with memory
 void init_memory();

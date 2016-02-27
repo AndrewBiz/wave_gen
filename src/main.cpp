@@ -3,17 +3,19 @@
    Andrew Bizyaev (ANB) github.com/andrewbiz
 */
 #include "wave_gen.h"
-#define WAVE_GEN_VERSION "0.9.2"
+#define WAVE_GEN_VERSION "0.9.3"
 
+// external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
 byte frequency_delta_index = DEF_FREQUENCY_INDEX;
-bool need_save_to_m0 = false;
 bool state_btn_pressed = false;
 bool state_btn_repeat = false;
 byte btn_pressed = btnNONE;
 uint32_t time_btn_pressed = 0;
 uint32_t time_btn_released = 0;
-LiquidCrystal lcd( RS, ENABLE, D4, D5, D6, D7 );
+
+// local vars
+bool need_save_to_m0 = false;
 
 void setup()
 {
@@ -22,10 +24,7 @@ void setup()
 
   // LCD setup
   lcd.begin(16, 2);
-  pinMode(D10, OUTPUT);   // backlight pin
-  digitalWrite(D10, HIGH); // backlight is ON when reset
-
-  // Initial screen
+  LCD_backlight(HIGH);
   LCD_show_line(0, F("AndrewBiz (c)"));
   LCD_show_line(1, F("Wave_Gen v" WAVE_GEN_VERSION));
   delay(1000);
@@ -56,7 +55,7 @@ void loop()
 
   if( state_btn_pressed ){
     //key was being pressed in the last cycle
-    switch(read_LCD_buttons()){
+    switch(LCD_read_buttons()){
       case btnUP:
         // the key is kept pressed by the user
         if( (millis() - time_btn_pressed) >= REPEAT_KEY_PRESS_INTERVAL){
@@ -163,7 +162,7 @@ void loop()
       save_to_memory(0);
       need_save_to_m0 = false;
     }
-    btn_pressed = read_LCD_buttons();
+    btn_pressed = LCD_read_buttons();
     if( (btn_pressed != btnNONE) and (btn_pressed != btnERROR) ){
       state_btn_pressed = true;
       time_btn_pressed = millis();
@@ -196,44 +195,6 @@ void transfer_byte(byte data)
     pulseHigh(W_CLK); //after each bit sent, CLK is pulsed high
   }
 }
-
-// Show frequency
-void LCD_show_frequency()
-{
-  String lcd_info = String(frequency) + " Hz"; //!!
-  LCD_show_line(0, lcd_info);
-}
-
-void LCD_show_frequency_delta(String prefix)
-{
-  String lcd_info = prefix + String(frequency_delta[frequency_delta_index]) + " Hz"; //!!
-  LCD_show_line(1, lcd_info);
-}
-
-// Show info on LCD screen
-void LCD_show_line(byte line_number, String info)
-{
-  lcd.setCursor(0, line_number);  // move to the begining of the line
-  lcd.print(F("                "));
-  lcd.setCursor(0, line_number);  // move to the begining of the line
-  lcd.print(info);
-}
-
- // read the buttons
-byte read_LCD_buttons()
-{
-  int key = analogRead(A0);   // read the value from the sensor
-  // buttons when read are centered at these valies: 0, 144, 329, 504, 741
-  // Serial.println(key);
-  if (key > 1000) return btnNONE;
-  if (key < 50)   return btnDELTA;
-  if (key < 250)  return btnUP;
-  if (key < 450)  return btnDOWN;
-  if (key < 650)  return btnMEMO2;
-  if (key < 850)  return btnMEMO1;
-  return btnERROR;             // when all others fail, return this.
-}
-
 
 void frequency_inc()
 {
