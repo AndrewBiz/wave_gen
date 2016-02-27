@@ -40,9 +40,6 @@ extern byte frequency_delta_index;
 void AD9850_init();
 void AD9850_set_frequency();
 
-void frequency_inc();
-void frequency_dec();
-
 // Show frequency
 void LCD_backlight(byte level);
 void LCD_show_frequency();
@@ -51,8 +48,8 @@ void LCD_show_line(byte line_number, String info);
 byte LCD_read_buttons();
 
 // working with memory
-void init_memory();
-void read_from_memory(byte memory_slot);
-void save_to_memory(byte memory_slot);
+void MEMORY_init();
+void MEMORY_read(byte memory_slot);
+void MEMORY_save(byte memory_slot);
 
 #endif
