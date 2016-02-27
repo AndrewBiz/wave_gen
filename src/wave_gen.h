@@ -22,14 +22,6 @@
 #define btnDELTA 5 // originally btnRIGHT
 #define btnERROR 99 //
 
-// AD9850 module pins
-#define DATA  A1 // connect to serial data load pin (DATA)
-#define W_CLK A2 // connect to word load clock pin (CLK)
-#define FQ_UD A3 // connect to freq update pin (FQ)
-#define RESET A4 // connect to reset pin (RST)
-
-#define pulseHigh(pin) {digitalWrite(pin, HIGH); digitalWrite(pin, LOW); }
-
 #define MIN_FREQUENCY 1
 #define MAX_FREQUENCY 20000000
 #define DEF_FREQUENCY 1000 //default freq
@@ -43,15 +35,11 @@ const uint32_t frequency_delta[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
 extern LiquidCrystal lcd;
 extern uint32_t frequency; //frequency of VFO
 extern byte frequency_delta_index;
-extern bool state_btn_pressed;
-extern bool state_btn_repeat;
-extern byte btn_pressed;
-extern uint32_t time_btn_pressed;
-extern uint32_t time_btn_released;
 
 // set frequency into DDS_DEVICE
-void transfer_byte(byte);
-void set_frequency();
+void AD9850_init();
+void AD9850_set_frequency();
+
 void frequency_inc();
 void frequency_dec();
 

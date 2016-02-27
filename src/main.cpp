@@ -3,18 +3,18 @@
    Andrew Bizyaev (ANB) github.com/andrewbiz
 */
 #include "wave_gen.h"
-#define WAVE_GEN_VERSION "0.9.3"
+#define WAVE_GEN_VERSION "0.9.4"
 
 // external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
 byte frequency_delta_index = DEF_FREQUENCY_INDEX;
+
+// local vars
 bool state_btn_pressed = false;
 bool state_btn_repeat = false;
 byte btn_pressed = btnNONE;
 uint32_t time_btn_pressed = 0;
 uint32_t time_btn_released = 0;
-
-// local vars
 bool need_save_to_m0 = false;
 
 void setup()
@@ -37,16 +37,8 @@ void setup()
   LCD_show_frequency();
   LCD_show_frequency_delta(" ");
 
-  // setup AD9850
-  pinMode(DATA,  OUTPUT);
-  pinMode(W_CLK, OUTPUT);
-  pinMode(FQ_UD, OUTPUT);
-  pinMode(RESET, OUTPUT);
-  pulseHigh(RESET);
-  pulseHigh(FQ_UD);  // this pulse enables serial mode on the AD9850 - Datasheet page 12.
-  // sent initial frequency to DDS device
-  set_frequency();
-  set_frequency(); //experimentally found out - need to set 2 times
+  // AD9850
+  AD9850_init();
 }
 
 void loop()
@@ -88,7 +80,7 @@ void loop()
               // it was short key press
               Log.Debug(F("Key btnMEMO1 short pressed"));
               read_from_memory(1);
-              set_frequency();
+              AD9850_set_frequency();
               need_save_to_m0 = true;
               LCD_show_frequency();
               LCD_show_frequency_delta(" ");
@@ -105,7 +97,7 @@ void loop()
               // it was short key press
               Log.Debug(F("Key btnMEMO2 short pressed"));
               read_from_memory(2);
-              set_frequency();
+              AD9850_set_frequency();
               need_save_to_m0 = true;
               LCD_show_frequency();
               LCD_show_frequency_delta(" ");
@@ -170,37 +162,11 @@ void loop()
   }
 } // loop
 
-// set frequency into DDS_DEVICE
-void set_frequency()
-{
-  // datasheet page 8: frequency = <sys clock> * <frequency tuning word>/2^32
-  // DDS_DEVICE allows an output frequency resolution of 0.0291 Hz with a 125 MHz reference clock applied
-  // double freq_tuning_word_d = frequency * 4294967295.0/125000000.0;  // note 125 MHz clock on 9850. You can make 'slight' tuning variations here by adjusting the clock frequency.
-  int32_t freq_tuning_word = frequency * 4294967295.0/125000000.0;  // note 125 MHz clock on 9850. You can make 'slight' tuning variations here by adjusting the clock frequency.
-  Log.Info(F("Setting frequency to " DDS_DEVICE ": %l Hz"), frequency);
-  Log.Debug(F("Tuning word = %l"), freq_tuning_word);
-
-  for (int b=0; b<4; b++, freq_tuning_word>>=8) {
-    transfer_byte(freq_tuning_word & 0xFF);
-  }
-  transfer_byte(0x00); // Final control byte, all 0 for 9850 chip
-  pulseHigh(FQ_UD);  // Done!  Should see output
-}
-
-// transfers a byte, a bit at a time, LSB first to the 9850 via serial DATA line
-void transfer_byte(byte data)
-{
-  for (int i=0; i<8; i++, data>>=1) {
-    digitalWrite(DATA, data & 0x01);
-    pulseHigh(W_CLK); //after each bit sent, CLK is pulsed high
-  }
-}
-
 void frequency_inc()
 {
   if((frequency + frequency_delta[frequency_delta_index]) <= MAX_FREQUENCY) {
     frequency = frequency + frequency_delta[frequency_delta_index];
-    set_frequency();
+    AD9850_set_frequency();
     need_save_to_m0 = true;
   }
 }
@@ -209,7 +175,7 @@ void frequency_dec()
 {
   if((frequency - frequency_delta[frequency_delta_index]) >= MIN_FREQUENCY) {
     frequency = frequency - frequency_delta[frequency_delta_index];
-    set_frequency();
+    AD9850_set_frequency();
     need_save_to_m0 = true;
   }
 }
