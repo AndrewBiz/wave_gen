@@ -3,7 +3,7 @@
    Andrew Bizyaev (ANB) github.com/andrewbiz
 */
 #include "wave_gen.h"
-#define WAVE_GEN_VERSION "0.9.4"
+#define WAVE_GEN_VERSION "0.9.5"
 
 // external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
@@ -51,22 +51,22 @@ void loop()
         //key was being pressed in the last cycle
         switch(LCD_read_buttons()) {
             case btnUP:
+                LCD_show_frequency_delta("+");
                 // the key is kept pressed by the user
                 if( (millis() - time_btn_pressed) >= REPEAT_KEY_PRESS_INTERVAL) {
                     state_btn_repeat = true;
                     Log.Debug(F("Key btnUP repeat"));
-                    LCD_show_frequency_delta("+");
                     frequency_inc();
                     LCD_show_frequency();
                 }
                 break; //casebtnUP
 
             case btnDOWN:
+                LCD_show_frequency_delta("-");
                 // the key is kept pressed by the user
                 if( (millis() - time_btn_pressed) >= REPEAT_KEY_PRESS_INTERVAL) {
                     state_btn_repeat = true;
                     Log.Debug(F("Key btnDOWN repeat"));
-                    LCD_show_frequency_delta("-");
                     frequency_dec();
                     LCD_show_frequency();
                 }
@@ -112,19 +112,19 @@ void loop()
                     case btnUP:
                         if(!state_btn_repeat) { // in repeate mode will not trigger btn unpress function
                             Log.Debug(F("Key btnUP pressed"));
-                            LCD_show_frequency_delta("+");
                             frequency_inc();
                             LCD_show_frequency();
                         }
+                        LCD_show_frequency_delta(" ");
                         break;
 
                     case btnDOWN:
                         if(!state_btn_repeat) { // in repeate mode will not trigger btn unpress function
                             Log.Debug(F("Key btnDOWN pressed"));
-                            LCD_show_frequency_delta("-");
                             frequency_dec();
                             LCD_show_frequency();
                         }
+                        LCD_show_frequency_delta(" ");
                         break;
 
                     case btnDELTA:
