@@ -2,71 +2,18 @@
    inspired by project of Richard Visokey AD7C - www.ad7c.com
    Andrew Bizyaev (ANB) github.com/andrewbiz
 */
-
-#include <LiquidCrystal.h>
-#include <EEPROM.h>
-#include <Logging.h>
-
-#define LOGLEVEL LOG_LEVEL_DEBUG //see Logging.h for options
-#define LOG_PRINT_TS true  // print time stamp in logging
-#define LOG_AUTO_LN  true  // print auto LN (CR) after each call
-
-#define WAVE_GEN_VERSION "0.9.0"
-#define DDS_DEVICE "AD9850"
-
-// LCD keypad ARDUINO pins mapping:
-#define D4     4 //LCD data
-#define D5     5 //LCD data
-#define D6     6 //LCD data
-#define D7     7 //LCD data
-#define RS     8 //LCD RS
-#define ENABLE 9 //LCD ENABLE
-#define D10   10 // LCD Backlight control
-
-LiquidCrystal lcd( RS, ENABLE, D4, D5, D6, D7 );
-
-// LCD keypad button pins mapping
-#define btnNONE  0 // originally btnNONE
-#define btnMEMO1 1 // originally btnSELECT
-#define btnMEMO2 2 // originally btnLEFT
-#define btnUP    3 // originally btnUP
-#define btnDOWN  4 // originally btnDOWN
-#define btnDELTA 5 // originally btnRIGHT
-#define btnERROR 99 //
-
-// AD9850 module pins
-#define DATA  A1 // connect to serial data load pin (DATA)
-#define W_CLK A2 // connect to word load clock pin (CLK)
-#define FQ_UD A3 // connect to freq update pin (FQ)
-#define RESET A4 // connect to reset pin (RST)
-
-#define pulseHigh(pin) {digitalWrite(pin, HIGH); digitalWrite(pin, LOW); }
-
-#define MIN_FREQUENCY 1
-#define MAX_FREQUENCY 20000000
-#define DEF_FREQUENCY 1000 //default freq
-#define MAX_FREQUENCY_INDEX 6
-#define DEF_FREQUENCY_INDEX 3 //default freq index
-#define SAVE_TO_M0_INTERVAL 7000 //7 sec after the key was pressed current frequency will be saved to EEPROM
-#define LONG_KEY_PRESS_INTERVAL 1000 //1 sec is considered long keypress
-#define REPEAT_KEY_PRESS_INTERVAL 300 //0,3 sec is considered to start autorepeat
-
-struct MemoryRecord
-{
-  uint32_t frequency;
-  byte frequency_delta_index;
-};
+#include "wave_gen.h"
+#define WAVE_GEN_VERSION "0.9.2"
 
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
 byte frequency_delta_index = DEF_FREQUENCY_INDEX;
-const uint32_t frequency_delta[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
-const byte EEPROM_address[] = { 0, 5, 10 };
 bool need_save_to_m0 = false;
 bool state_btn_pressed = false;
 bool state_btn_repeat = false;
 byte btn_pressed = btnNONE;
-unsigned long time_btn_pressed = 0;
-unsigned long time_btn_released = 0;
+uint32_t time_btn_pressed = 0;
+uint32_t time_btn_released = 0;
+LiquidCrystal lcd( RS, ENABLE, D4, D5, D6, D7 );
 
 void setup()
 {
@@ -287,70 +234,6 @@ byte read_LCD_buttons()
   return btnERROR;             // when all others fail, return this.
 }
 
-//init memory
-void init_memory()
-{
-  for (byte i=0; i<3; i++) {
-    Log.Info(F("Initializing M%d"), i);
-    MemoryRecord m = { 0, 99};
-    EEPROM.get(EEPROM_address[i], m);
-    uint32_t f = long(m.frequency);
-    if(isnan(f)) f = 0;
-    if(isinf(f)) f = 0;
-    byte fdi = byte(m.frequency_delta_index);
-    if(isnan(fdi)) fdi = 0;
-    if(isinf(fdi)) fdi = 0;
-    Log.Info(F("Stored values: %l Hz, delta = %l Hz"), f, frequency_delta[fdi]);
-    if((f <= MIN_FREQUENCY) or (f >= MAX_FREQUENCY)){
-      m.frequency = DEF_FREQUENCY;
-      Log.Debug(F("Saving new frequency: %l Hz"), m.frequency);
-    }
-    else {
-      m.frequency = f;
-    }
-    if((fdi < 0) or (fdi > MAX_FREQUENCY_INDEX)){
-      m.frequency_delta_index = DEF_FREQUENCY_INDEX;
-      Log.Debug(F("Saving new delta: %l Hz"), frequency_delta[m.frequency_delta_index]);
-    }
-    else {
-      m.frequency_delta_index = fdi;
-    }
-    EEPROM.put(EEPROM_address[i], m);
-  }
-}
-
-// working with memory
-void read_from_memory(byte memory_slot)
-{
-  MemoryRecord m;
-  EEPROM.get(EEPROM_address[memory_slot], m);
-  frequency = long(m.frequency);
-  frequency_delta_index = byte(m.frequency_delta_index);
-  Log.Info(F("Read from EEPROM M%i: %l Hz, delta %l Hz"), memory_slot, frequency, frequency_delta[m.frequency_delta_index]);
-  lcd.setCursor(14,0);
-  lcd.print("M"); lcd.print(memory_slot);
-  delay(800);
-  lcd.setCursor(14,0);
-  lcd.print("  ");
- }
-
-void save_to_memory(byte memory_slot)
-{
-  MemoryRecord m = {
-    frequency,
-    frequency_delta_index
-  };
-  EEPROM.put(EEPROM_address[memory_slot], m);
-  Log.Info(F("Saved to EEPROM M%i: %l Hz, delta %l Hz"), memory_slot, frequency, frequency_delta[m.frequency_delta_index]);
-  for (byte i=0; i<3; i++) {
-    lcd.setCursor(14,0);
-    lcd.print("M"); lcd.print(memory_slot);
-    delay(400);
-    lcd.setCursor(14,0);
-    lcd.print("  ");
-    delay(500);
-  }
-}
 
 void frequency_inc()
 {
