@@ -3,7 +3,7 @@
    Andrew Bizyaev (ANB) github.com/andrewbiz
 */
 #include "wave_gen.h"
-#define WAVE_GEN_VERSION "0.9.5"
+#define WAVE_GEN_VERSION "0.9.6"
 
 // external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
