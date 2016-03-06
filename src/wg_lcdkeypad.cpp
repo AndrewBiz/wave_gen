@@ -4,16 +4,21 @@
 */
 #include "wave_gen.h"
 
+/* LCD keypad upper PINS map:
+     |   |   |       |     |     |   |
+    D13 D12 D11     D3    D2    D1  D0
+                 (int1) (int0)
+*/
 // LCD keypad ARDUINO pins mapping:
-#define LCD_D0      4 //LCD data
-#define LCD_D1      5 //LCD data
-#define LCD_D2      6 //LCD data
-#define LCD_D3      7 //LCD data
+#define LCD_D4      4 //LCD data
+#define LCD_D5      5 //LCD data
+#define LCD_D6      6 //LCD data
+#define LCD_D7      7 //LCD data
 #define LCD_RS      8 //LCD RS
 #define LCD_ENABLE  9 //LCD ENABLE
 #define LCD_BL      10 // LCD Backlight control
 
-LiquidCrystal lcd( LCD_RS, LCD_ENABLE, LCD_D0, LCD_D1, LCD_D2, LCD_D3 );
+LiquidCrystal lcd( LCD_RS, LCD_ENABLE, LCD_D4, LCD_D5, LCD_D6, LCD_D7 );
 
 void LCD_backlight(byte level)
 {
