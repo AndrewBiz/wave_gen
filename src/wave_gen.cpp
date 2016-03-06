@@ -3,7 +3,7 @@
    Andrew Bizyaev (ANB) github.com/andrewbiz
 */
 #include "wave_gen.h"
-#define WAVE_GEN_VERSION "0.9.6"
+#define WAVE_GEN_VERSION "0.10.0"
 
 // external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
@@ -50,7 +50,26 @@ void loop()
     if ( state_btn_pressed ) {
         //key was being pressed in the last cycle
         switch(LCD_read_buttons()) {
+            case btnMEMO1:
+                // the user keeps pressing the button
+                if( (millis() - time_btn_pressed) >= LONG_KEY_PRESS_INTERVAL){
+                    // enough time passed for long press-n-hold
+                    lcd.setCursor(14,0);
+                    lcd.print("M1");
+                }
+                break;
+
+            case btnMEMO2:
+                // the user keeps pressing the button
+                if( (millis() - time_btn_pressed) >= LONG_KEY_PRESS_INTERVAL){
+                    // enough time passed for long press-n-hold
+                    lcd.setCursor(14,0);
+                    lcd.print("M2");
+                }
+                break;
+
             case btnUP:
+                // the user keeps pressing the button
                 LCD_show_frequency_delta("+");
                 // the key is kept pressed by the user
                 if( (millis() - time_btn_pressed) >= REPEAT_KEY_PRESS_INTERVAL) {
@@ -62,6 +81,7 @@ void loop()
                 break; //casebtnUP
 
             case btnDOWN:
+                // the user keeps pressing the button
                 LCD_show_frequency_delta("-");
                 // the key is kept pressed by the user
                 if( (millis() - time_btn_pressed) >= REPEAT_KEY_PRESS_INTERVAL) {
