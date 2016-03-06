@@ -3,7 +3,9 @@
    Andrew Bizyaev (ANB) github.com/andrewbiz
 */
 #include "wave_gen.h"
-#define WAVE_GEN_VERSION "0.10.0"
+#include <Encoder.h>
+
+#define WAVE_GEN_VERSION "0.11.2"
 
 // external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
@@ -21,6 +23,10 @@ uint32_t time_btn_pressed = 0;
 uint32_t time_btn_released = 0;
 bool need_save_to_m0 = false;
 
+Encoder wg_encoder(3, 2);
+long oldPosition  = -999;
+long newPosition;
+
 void setup()
 {
     Log.Init(LOGLEVEL, 38400L, LOG_PRINT_TS, LOG_AUTO_LN);
@@ -30,8 +36,8 @@ void setup()
     lcd.begin(16, 2);
     LCD_backlight(HIGH);
     LCD_show_line(0, F("AndrewBiz (c)"));
-    LCD_show_line(1, F("Wave_Gen v" WAVE_GEN_VERSION));
-    delay(1000);
+    LCD_show_line(1, F("WaveGen " WAVE_GEN_VERSION));
+    delay(2000);
 
     MEMORY_init();
     //read from default memory slot
@@ -42,11 +48,21 @@ void setup()
 
     // AD9850
     AD9850_init();
+
+    // Encoder init
+    wg_encoder.write(10000);
 }
 
 void loop()
 {
     delay(50);
+    // test encoder
+    newPosition = wg_encoder.read();
+    if (newPosition != oldPosition) {
+        oldPosition = newPosition;
+        Log.Debug(F("Encoder position: %l"), newPosition);
+    }
+
     if ( state_btn_pressed ) {
         //key was being pressed in the last cycle
         switch(LCD_read_buttons()) {
@@ -103,7 +119,6 @@ void loop()
                             Log.Debug(F("Key btnMEMO1 short pressed"));
                             MEMORY_read(1);
                             AD9850_set_frequency();
-                            need_save_to_m0 = true;
                             LCD_show_frequency();
                             LCD_show_frequency_delta(" ");
                         } else {
@@ -119,7 +134,6 @@ void loop()
                             Log.Debug(F("Key btnMEMO2 short pressed"));
                             MEMORY_read(2);
                             AD9850_set_frequency();
-                            need_save_to_m0 = true;
                             LCD_show_frequency();
                             LCD_show_frequency_delta(" ");
                         } else {
