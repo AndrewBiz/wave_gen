@@ -27,6 +27,9 @@
 #define DEF_FREQUENCY 1000 //default freq
 #define MAX_FREQUENCY_INDEX 6
 #define DEF_FREQUENCY_INDEX 3 //default freq index
+#define MIN_PHASE 0
+#define MAX_PHASE 31
+#define DEF_PHASE 0
 #define SAVE_TO_M0_INTERVAL 7000 //7 sec after the key was pressed current frequency will be saved to EEPROM
 #define LONG_KEY_PRESS_INTERVAL 1000 //1 sec is considered long keypress
 #define REPEAT_KEY_PRESS_INTERVAL 300 //0,3 sec is considered to start autorepeat
@@ -35,6 +38,7 @@ const uint32_t frequency_delta[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
 extern LiquidCrystal lcd;
 extern uint32_t frequency; //frequency of VFO
 extern byte frequency_delta_index;
+extern byte phase;  // phase shift (5 bit)
 
 // set frequency into DDS_DEVICE
 void AD9850_init();

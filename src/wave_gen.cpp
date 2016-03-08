@@ -5,11 +5,12 @@
 #include "wave_gen.h"
 #include <Encoder.h>
 
-#define WAVE_GEN_VERSION "0.11.2"
+#define WAVE_GEN_VERSION "0.12.1"
 
 // external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
 byte frequency_delta_index = DEF_FREQUENCY_INDEX;
+byte phase = DEF_PHASE;
 
 void frequency_inc();
 void frequency_dec();
@@ -50,18 +51,28 @@ void setup()
     AD9850_init();
 
     // Encoder init
-    wg_encoder.write(10000);
+    wg_encoder.write(phase);
 }
 
 void loop()
 {
     delay(50);
-    // test encoder
+    // TMP start test encoder
     newPosition = wg_encoder.read();
     if (newPosition != oldPosition) {
         oldPosition = newPosition;
         Log.Debug(F("Encoder position: %l"), newPosition);
+        if (newPosition > MAX_PHASE) {
+            phase = MAX_PHASE;
+        } else if (newPosition < MIN_PHASE) {
+            phase = MIN_PHASE;
+        } else {
+            phase = newPosition;
+            AD9850_set_frequency();
+        }
+        Log.Debug(F("Phase: %i"), phase);
     }
+    // TMP end
 
     if ( state_btn_pressed ) {
         //key was being pressed in the last cycle
