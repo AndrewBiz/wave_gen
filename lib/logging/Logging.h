@@ -16,14 +16,14 @@ extern "C" {
 }
 
 
-#define LOG_LEVEL_NOOUTPUT 0 
+#define LOG_LEVEL_NOOUTPUT 0
 #define LOG_LEVEL_ERRORS 1
 #define LOG_LEVEL_INFOS 2
 #define LOG_LEVEL_DEBUG 3
 #define LOG_LEVEL_VERBOSE 4
 
 // default loglevel if nothing is set from user
-#define LOGLEVEL LOG_LEVEL_DEBUG 
+// #define LOGLEVEL LOG_LEVEL_DEBUG
 
 #define CR "\r\n"
 #define LOGGING_VERSION 1
@@ -77,19 +77,19 @@ private:
     bool _print_ts;
     bool _auto_ln;
 public:
-    /*! 
+    /*!
 	 * default Constructor
 	 */
     Logging(){} ;
-	
-    /** 
+
+    /**
 	* Initializing, must be called as first.
 	* \param void
 	* \return void
 	*
 	*/
     void Init(int level, long baud, bool print_ts, bool auto_ln);
-	
+
     /**
 	* Output an error message. Output message contains
 	* ERROR: followed by original msg
@@ -183,4 +183,3 @@ private:
 
 extern Logging Log;
 #endif
-

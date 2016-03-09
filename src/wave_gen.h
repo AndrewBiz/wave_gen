@@ -8,7 +8,8 @@
 #include <LiquidCrystal.h>
 #include <Logging.h>
 
-#define LOGLEVEL LOG_LEVEL_DEBUG //see Logging.h for options
+#define LOGLEVEL LOG_LEVEL_DEBUG // see Logging.h for options
+// #define LOGLEVEL LOG_LEVEL_VERBOSE // see Logging.h for options
 #define LOG_PRINT_TS true  // print time stamp in logging
 #define LOG_AUTO_LN  true  // print auto LN (CR) after each call
 #define DDS_DEVICE "AD9850"

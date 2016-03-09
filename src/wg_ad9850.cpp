@@ -16,7 +16,7 @@
 #define Byte4(w) ((uint8_t) ((w) >> 24))
 
 void transfer_byte(byte);
-// const char* byte_to_string(byte);
+// String byte_to_string(byte);
 
 void AD9850_init()
 {
@@ -42,7 +42,7 @@ void AD9850_set_frequency()
     uint32_t freq_tuning_word = frequency * 4294967295/125000000;
     uint8_t phase_control_byte = (phase << 3);
 
-    Log.Info(F("Setting frequency to " DDS_DEVICE ": %l Hz"), frequency);
+    Log.Info(F("Setting frequency to " DDS_DEVICE ": %l Hz, phase byte %B"), frequency, phase);
     Log.Debug(F("Tuning word: %l (%B %B %B %B)"), freq_tuning_word,\
                 Byte4(freq_tuning_word), Byte3(freq_tuning_word),\
                 Byte2(freq_tuning_word), Byte1(freq_tuning_word) );
@@ -62,25 +62,28 @@ void transfer_byte(byte data)
     Log.Debug(F("....Sending byte: %b"), data);
     for (int i=0; i < 8; i++, data >>= 1) {
         digitalWrite(DATA, data & 0x01);
-        //Log.Debug(F("........bit: %b"), data & 0x01);
+        #if defined(LOGLEVEL) && LOGLEVEL == LOG_LEVEL_VERBOSE
+            Log.Verbose(F("........bit: %b"), data & 0x01);
+        #endif
         pulseHigh(W_CLK); //after each bit sent, CLK is pulsed high
     }
 }
 
-// const char* byte_to_string(byte data)
+// String byte_to_string(byte data)
 // {
-//     static char strbuf[9] = "";
-//     int num_places = 8, i = 0;
-//     while (num_places) {
-//         if (data & (0x0001 << (num_places-1))) {
-//              strbuf[i] = '1';
-//              Serial.print("1");
-//         } else {
-//              strbuf[i] = '0';
-//              Serial.print("0");
-//         }
-//         --num_places;
-//         ++i;
-//     }
-//     return strbuf;
+//     char strbuf[10] = "01010101";
+//     sprintf( strbuf, "%08i", data );
+    // int num_places = 8, i = 0;
+    // while (num_places) {
+    //     if (data & (0x0001 << (num_places-1))) {
+    //          strbuf[i] = '1';
+    //          Serial.print("1");
+    //     } else {
+    //          strbuf[i] = '0';
+    //          Serial.print("0");
+    //     }
+    //     --num_places;
+    //     ++i;
+    // }
+//     return String(strbuf);
 // }
