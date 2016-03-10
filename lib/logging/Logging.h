@@ -26,7 +26,7 @@ extern "C" {
 // #define LOGLEVEL LOG_LEVEL_DEBUG
 
 #define CR "\r\n"
-#define LOGGING_VERSION 1
+#define LOGGING_VERSION 2
 
 /*!
 * Logging is a helper class to output informations over
@@ -52,6 +52,8 @@ extern "C" {
 * <li><b>\%X</b>	like %x but combine with <b>0x</b>123AB</li>
 * <li><b>\%b</b>	replace and convert integer value into binary</li>
 * <li><b>\%B</b>	like %x but combine with <b>0b</b>10100011</li>
+* <li><b>\%y</b>	replace and convert uint8_t value into binary with leading 0</li>
+* <li><b>\%Y</b>	like %y but combine with <b>0b</b></li>
 * <li><b>\%t</b>	replace and convert boolean value into <b>"t"</b> or <b>"f"</b></li>
 * <li><b>\%T</b>	like %t but convert into <b>"true"</b> or <b>"false"</b></li>
 * </ul><br>
@@ -179,6 +181,7 @@ private:
     void print(const __FlashStringHelper *format, va_list args);
     void printFormat(const char format, va_list *args);
     void print_ts();
+    void print_u8_to_bin(uint8_t b);
 };
 
 extern Logging Log;

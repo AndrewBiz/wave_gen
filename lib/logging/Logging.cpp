@@ -77,6 +77,17 @@ void Logging::printFormat(const char format, va_list *args) {
     return;
   }
 
+  if( format == 'y' ) {
+    print_u8_to_bin( (uint8_t) (va_arg(*args, int) &0xff) );
+    return;
+  }
+
+  if( format == 'Y' ) {
+    Serial.print("0b");
+    print_u8_to_bin( (uint8_t) (va_arg(*args, int) &0xff) );
+    return;
+  }
+
   if( format == 'l' ) {
     Serial.print(va_arg( *args, long ),DEC);
     return;
@@ -116,6 +127,11 @@ void Logging::print_ts() {
     Serial.print(tsbuf);
   }
 }
+// Print BINary with leading zeros, 8 char wide
+void Logging::print_u8_to_bin(uint8_t b) {
+    for (uint8_t z = 128; z > 0; z >>= 1) {
+        ((b & z) == z) ? Serial.print('1') : Serial.print('0');
+    }
+}
 
- Logging Log = Logging();
-
+Logging Log = Logging();
