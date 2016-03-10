@@ -5,6 +5,7 @@
 #ifndef WAVE_GEN_H
 #define WAVE_GEN_H
 #include <Arduino.h>
+#include <inttypes.h>
 #include <LiquidCrystal.h>
 #include <Logging.h>
 
@@ -13,6 +14,11 @@
 #define LOG_PRINT_TS true  // print time stamp in logging
 #define LOG_AUTO_LN  true  // print auto LN (CR) after each call
 #define DDS_DEVICE "AD9850"
+
+#define Byte1(w) ((uint8_t) ((w) & 0xff))
+#define Byte2(w) ((uint8_t) ((w) >> 8))
+#define Byte3(w) ((uint8_t) ((w) >> 16))
+#define Byte4(w) ((uint8_t) ((w) >> 24))
 
 // LCD keypad button pins mapping
 #define btnNONE  0 // originally btnNONE

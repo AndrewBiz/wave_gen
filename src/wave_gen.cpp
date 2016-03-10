@@ -5,7 +5,7 @@
 #include "wave_gen.h"
 #include <Encoder.h>
 
-#define WAVE_GEN_VERSION "0.12.3"
+#define WAVE_GEN_VERSION "0.13.0"
 
 // external global vars definitions
 uint32_t frequency = DEF_FREQUENCY; //frequency of VFO
