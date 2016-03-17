@@ -93,6 +93,11 @@ void Logging::printFormat(const char format, va_list *args) {
     return;
   }
 
+  if( format == 'u' ) {
+    Serial.print(va_arg( *args, uint32_t ),DEC);
+    return;
+  }
+
   if( format == 'c' ) {
     Serial.print(va_arg( *args, int ));
     return;

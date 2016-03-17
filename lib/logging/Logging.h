@@ -48,6 +48,7 @@ extern "C" {
 * <li><b>\%c</b>	replace with an character</li>
 * <li><b>\%d</b>	replace with an integer value</li>
 * <li><b>\%l</b>	replace with an long value</li>
+* <li><b>\%u</b>	replace with an Unsigned long value</li>
 * <li><b>\%x</b>	replace and convert integer value into hex</li>
 * <li><b>\%X</b>	like %x but combine with <b>0x</b>123AB</li>
 * <li><b>\%b</b>	replace and convert integer value into binary</li>
